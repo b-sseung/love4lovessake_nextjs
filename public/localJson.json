@@ -1,0 +1,36 @@
+{
+  "iconList": {
+    "OTT": ["ott.png", "/ott"],
+    "유튜브": ["youtube.png", "https://www.youtube.com/@love4lovesake_official"],
+    "X": ["twitter.png", "https://twitter.com/love4lovesake"],
+    "인스타그램": ["instagram.png", "https://www.instagram.com/love4lovesake_official"],
+    "원작": ["ridi.jpg", "https://ridibooks.com/books/297040776"]
+  },
+  "menuList": {
+    "차주완": [
+      { "name": "인물소개", "content": "/chajoowan" },
+      { "name": "인스타그램", "content": "https://www.instagram.com/chajoowan/" }
+    ],
+    "이태빈": [
+      { "name": "인물소개", "content": "/leetaevin" },
+      { "name": "인스타그램", "content": "https://www.instagram.com/taevin.lee/" },
+      {
+        "name": "프롬",
+        "content": "https://store.frommyarti.com/arti/leetaevin?utm_source=twitter&utm_medium=owned_feed&utm_campaign=sns-event_fromm_channel&utm_content=leetaevin&utm_term=ltvl_open_event"
+      }
+    ],
+    "웨이보": [
+      {
+        "name": "연지구_태그",
+        "content": "https://m.weibo.cn/p/index?extparam=%E9%9F%A9%E5%89%A7%E6%81%8B%E7%88%B1%E8%87%B3%E4%B8%8A%E4%B8%BB%E4%B9%89%E5%8C%BA%E5%9F%9F&containerid=100808790af838158219dd8875ce8024ea520e&luicode=10000011&lfid=100808790af838158219dd8875ce8024ea520e"
+      },
+      { "name": "이태빈_공식", "content": "https://m.weibo.cn/u/7901169424" }
+    ],
+    "갤러리": [
+      { "name": "전체", "content": "" },
+      { "name": "차주완", "content": "" },
+      { "name": "이태빈", "content": "" }
+    ],
+    "미니게임": [{ "name": "뱀 게임", "content": "" }]
+  }
+}
