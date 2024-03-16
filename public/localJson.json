@@ -32,5 +32,13 @@
       { "name": "이태빈", "content": "" }
     ],
     "미니게임": [{ "name": "뱀 게임", "content": "" }]
+  },
+  "source": {
+    "0": { "title": "인스타그램 게시물", "content": "instagram" },
+    "1": { "title": "인스타그램 스토리", "content": "instagram_story" },
+    "2": { "title": "X", "content": "twitter" },
+    "3": { "title": "유튜브", "content": "youtube" },
+    "4": { "title": "웨이보", "content": "weibo" },
+    "5": { "title": "기타", "content": "etd" }
   }
 }

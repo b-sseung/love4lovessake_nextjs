@@ -1,8 +1,9 @@
 import { getLocalJson } from '@/pages/api/api';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styled, { css } from 'styled-components';
+import PortfolioContext from '@/context/context';
 
 const LinkParent = styled.div`
   display: grid;
@@ -22,7 +23,9 @@ const LinkItem = ({ baseUrl, text, item }) => {
 
 const OfficialLink = () => {
   const [list, setList] = useState({});
-  const iconUrl = '/images/icons/';
+  const { prefix } = useContext(PortfolioContext);
+
+  const iconUrl = `${prefix}/images/icons/`;
 
   useEffect(() => {
     const getList = async () => {

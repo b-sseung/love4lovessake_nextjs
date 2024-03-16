@@ -1,12 +1,14 @@
 {
-  "name": "love4lovessake",
+  "homepage": "https://love4lovesake.com",
+  "name": "love4lovessake_fanpage",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export"
   },
   "dependencies": {
     "jquery": "^3.7.1",

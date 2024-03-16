@@ -1,11 +1,12 @@
 import styled, { css } from 'styled-components';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useContext, useState, useRef } from 'react';
 import $ from 'jquery';
 import MenuContainer from './Menu';
 import Footer from './Footer';
 import Header from './Header';
 import OfficialLink from './home/OfficialLink';
 import { absoluteCenter, flexCol } from './css/common';
+import PortfolioContext from '@/context/context';
 
 const MainContent = styled.div(
   flexCol,
@@ -49,11 +50,12 @@ const FrontImg = styled.img(
 
 const Home = () => {
   const [ratio, setRatio] = useState('01');
+  const { prefix } = useContext(PortfolioContext);
 
   const delay = 100;
   let timer = useRef(null);
 
-  let bgImgUrl = `/images/background-${ratio}.jpg`;
+  let bgImgUrl = `${prefix}/images/background-${ratio}.jpg`;
 
   useEffect(() => {
     getRatio();
