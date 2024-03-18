@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }) {
     <PortfolioProvider value={{ prefix }}>
       <Head>
         <title>연지구 팬페이지</title>
-        <link rel="icon" href={`${prefix}/images/icons/logo.jpg`} />
+        <link rel="icon" href={`/images/icons/logo.jpg`} />
       </Head>
       <Component {...pageProps} />
     </PortfolioProvider>

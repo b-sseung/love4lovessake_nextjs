@@ -7,6 +7,7 @@ import Header from './Header';
 import OfficialLink from './home/OfficialLink';
 import { absoluteCenter, flexCol } from './css/common';
 import PortfolioContext from '@/context/context';
+import Image from 'next/image';
 
 const MainContent = styled.div(
   flexCol,
@@ -17,17 +18,15 @@ const MainContent = styled.div(
   `
 );
 
-const BackImg = styled.img(
-  css`
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    opacity: 0.5;
+const BackImg = styled.img`
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  opacity: 0.5;
 
-    object-fit: cover;
-    filter: blur(6px);
-  `
-);
+  object-fit: cover;
+  filter: blur(6px);
+`;
 
 const FrontDiv = styled.div(
   absoluteCenter,
@@ -39,14 +38,12 @@ const FrontDiv = styled.div(
   `
 );
 
-const FrontImg = styled.img(
-  css`
-    object-fit: scale-down;
-    width: 100%;
-    height: 0;
-    flex-grow: 1;
-  `
-);
+const FrontImg = styled.img`
+  object-fit: scale-down;
+  width: 100%;
+  height: 0;
+  flex-grow: 1;
+`;
 
 const Home = () => {
   const [ratio, setRatio] = useState('01');

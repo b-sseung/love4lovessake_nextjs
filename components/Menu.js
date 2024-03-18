@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components';
 import { useState, useEffect } from 'react';
 import { getLocalJson } from '@/pages/api/api';
+import { isNotNull } from './js/common';
 
 // const MenuBox = styled.div(
 //   css`
@@ -117,9 +118,12 @@ const MenuContainer = () => {
     getMenu();
   }, []);
 
+  console.log(menuList);
+
   return (
     <MenuBox>
-      {Object.keys(menuList).length > 0 &&
+      {isNotNull(menuList) &&
+        Object.keys(menuList).length > 0 &&
         Object.keys(menuList).map((key) => {
           return <MenuParent key={key} text={key} sub={menuList[key]}></MenuParent>;
         })}

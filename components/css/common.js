@@ -21,3 +21,8 @@ export const absoluteCenter = css`
   left: 50%;
   transform: translate(-50%, -50%);
 `;
+
+export const inputStyle = css`
+  border: 1px solid gray;
+  border-radius: 50px;
+`;
