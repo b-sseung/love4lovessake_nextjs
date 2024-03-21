@@ -118,8 +118,6 @@ const MenuContainer = () => {
     getMenu();
   }, []);
 
-  console.log(menuList);
-
   return (
     <MenuBox>
       {isNotNull(menuList) &&

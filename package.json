@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.8",
+    "base64-js": "^1.5.1",
     "browser-image-compression": "^2.0.2",
     "google-auth-library": "^9.7.0",
     "google-spreadsheet": "^4.1.1",

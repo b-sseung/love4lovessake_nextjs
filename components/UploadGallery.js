@@ -6,6 +6,7 @@ import { useState, forwardRef, useEffect, useReducer } from 'react';
 import { getLocalJson, insertGallery, addRow } from '@/pages/api/api';
 import Image from 'next/image';
 import imageCompression from 'browser-image-compression';
+import { byteLength, toByteArray } from 'base64-js';
 // react-datepicker,
 
 const uploadFileForm = (state, action) => {
@@ -108,6 +109,7 @@ const UploadGallery = () => {
 
   const [selectDate, setSelectDate] = useState(new Date());
   const [month, setMonth] = useState(new Date().getMonth());
+  const [images, setImages] = useState([]);
 
   const handleMonthChange = (date) => {
     setMonth(date.getMonth());
@@ -119,7 +121,8 @@ const UploadGallery = () => {
 
   const onLoadFile = async (e) => {
     const extensions = [];
-    const files = [];
+    const thumnails = [];
+    const datas = [];
 
     let fileList = e.target.files;
 
@@ -133,14 +136,23 @@ const UploadGallery = () => {
       });
 
       const resizingFile = new File([newFile], file['type'], { type: file['type'] });
-      console.log(newFile);
 
       let fileReader = new FileReader();
       fileReader.onload = () => {
         const result = fileReader.result;
-        console.log(result);
-        files.push(result);
-        changeState('file_data', [...files]);
+        const resultArr = [];
+        let index = 0;
+
+        while (index < result.length) {
+          let lastIndex = Math.min(index + 50000, result.length);
+          resultArr.push(result.slice(index, lastIndex));
+          index = lastIndex;
+        }
+
+        thumnails.push(result);
+        datas.push(resultArr);
+        changeState('file_data', [...datas]);
+        setImages(thumnails);
       };
 
       fileReader.readAsDataURL(resizingFile);
@@ -153,7 +165,21 @@ const UploadGallery = () => {
     const fileData = JSON.stringify(initState['file_data']);
     const fileExtension = JSON.stringify(initState['file_extension']);
 
-    const response = await fetch('/api/googlesheets', {
+    const year = initState['date'].getFullYear();
+
+    const getResponse = await fetch('/api/get', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ date: year, range: 'A:B' }),
+    });
+
+    const getResult = await getResponse.json();
+    console.log(getResult.data);
+
+    const response = await fetch('/api/insert', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -226,9 +252,8 @@ const UploadGallery = () => {
           <input id="fileImage" style={{ display: 'none' }} type="file" onChange={onLoadFile} multiple></input>
         </div>
       )}
-      {initState['file_data'].length > 0 &&
-        initState['file_data'].map((data, index) => {
-          console.log(index);
+      {images.length > 0 &&
+        images.map((data, index) => {
           return <ImageView key={index} data={data}></ImageView>;
         })}
       <button onClick={onSubmit}>등록하기</button>
