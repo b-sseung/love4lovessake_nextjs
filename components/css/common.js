@@ -2,10 +2,11 @@ import { css } from 'styled-components';
 
 export const font = css`
   @font-face {
-    font-family: 'continuous';
-    src: url('./fonts/continuous.ttf') format('truetype');
+    font-family: 'DancingScript-Bold';
+    src: url('./fonts/DancingScript-Bold.ttf') format('truetype');
   }
 `;
+
 export const flexRow = css`
   display: flex;
   flex-direction: row;

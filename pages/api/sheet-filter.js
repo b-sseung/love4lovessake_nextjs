@@ -16,15 +16,6 @@ const getdoc = async () => {
   await doc.loadInfo();
 };
 
-export const config = {
-  api: {
-    responseLimit: '5mb',
-    bodyParser: {
-      sizeLimit: '5mb',
-    },
-  },
-};
-
 const handler = async (req, res) => {
   try {
     const body = req.body;
@@ -33,12 +24,27 @@ const handler = async (req, res) => {
       await getdoc();
     }
 
-    const sheets = doc.sheetsByTitle[body.title];
-    const response = await sheets.addRow(body.row);
+    const sheets = doc.sheetsByTitle[body.sheetName];
+    const rows = await sheets.getRows();
 
-    return res.status(200).json({ message: 'ok' });
+    const table = rows.filter((row) => row.get(body.columnId).indexOf(body.word) !== -1);
+    let result = {};
+
+    const columns = body.resColumn;
+    table.forEach((element) => {
+      let tmpArr = {};
+
+      columns.forEach((column) => {
+        tmpArr = { ...tmpArr, [column]: element.get(column) };
+      });
+
+      result = { ...result, [element.rowNumber]: tmpArr };
+    });
+
+    return res.status(200).json({ data: result });
   } catch (e) {
-    return res.status(500).send({ message: 'faild' });
+    console.log(e);
+    return res.status(500).json({ message: e });
   }
 };
 

@@ -3,26 +3,12 @@ import styled, { css } from 'styled-components';
 import 'react-datepicker/dist/react-datepicker.css';
 import $ from 'jquery';
 import { useState, forwardRef, useEffect, useReducer } from 'react';
-import { getLocalJson, insertGallery, addRow } from '@/pages/api/api';
+import { getLocalJson } from '@/pages/api/api';
 import Image from 'next/image';
 import imageCompression from 'browser-image-compression';
-import { byteLength, toByteArray } from 'base64-js';
-// react-datepicker,
+import { flexRow } from './css/common';
 
-const uploadFileForm = (state, action) => {
-  state = { ...state, [action.type]: action.value };
-  return state;
-};
-
-const RadioButton = ({ value, name, text, onChange }) => {
-  return (
-    <>
-      <input type="radio" value={value} name={name} id={value} onChange={() => onChange(name, value)}></input>
-      <label htmlFor={value}>{text}</label>
-    </>
-  );
-};
-
+// css
 const CustomDatePicker = styled.div(
   css`
     .custom-day {
@@ -47,6 +33,33 @@ const DateInput = {
   background: 'white',
   border: '1px solid gray',
   borderRadius: '10px',
+};
+
+const ImageBox = styled.div(
+  flexRow,
+  css`
+    width: 100%;
+    overflow-x: scroll;
+    scrollbar-width: none;
+
+    :last-child {
+      margin-right: 0px;
+    }
+
+    img {
+      margin-right: 10px;
+    }
+  `
+);
+
+// tag
+const RadioButton = ({ value, name, text, onChange }) => {
+  return (
+    <>
+      <input type="radio" value={value} name={name} id={value} onChange={() => onChange(name, value)}></input>
+      <label htmlFor={value}>{text}</label>
+    </>
+  );
 };
 
 const DatePickerInput = forwardRef(({ value, onClick }, ref) => {
@@ -95,6 +108,12 @@ const ImageView = ({ data }) => {
   return <Image width={100} height={100} alt="" src={data}></Image>;
 };
 
+// event
+const uploadFileForm = (state, action) => {
+  state = { ...state, [action.type]: action.value };
+  return state;
+};
+
 const UploadGallery = () => {
   const [initState, dispatch] = useReducer(uploadFileForm, {
     date: new Date(),
@@ -122,7 +141,6 @@ const UploadGallery = () => {
   const onLoadFile = async (e) => {
     const extensions = [];
     const thumnails = [];
-    const datas = [];
 
     let fileList = e.target.files;
 
@@ -131,8 +149,8 @@ const UploadGallery = () => {
       extensions.push(file['type']);
 
       const newFile = await imageCompression(fileList[i], {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 1920,
+        maxSizeMB: 4.5,
+        maxWidthOrHeight: 3840,
       });
 
       const resizingFile = new File([newFile], file['type'], { type: file['type'] });
@@ -140,18 +158,9 @@ const UploadGallery = () => {
       let fileReader = new FileReader();
       fileReader.onload = () => {
         const result = fileReader.result;
-        const resultArr = [];
-        let index = 0;
-
-        while (index < result.length) {
-          let lastIndex = Math.min(index + 50000, result.length);
-          resultArr.push(result.slice(index, lastIndex));
-          index = lastIndex;
-        }
 
         thumnails.push(result);
-        datas.push(resultArr);
-        changeState('file_data', [...datas]);
+        changeState('file_data', [...thumnails]);
         setImages(thumnails);
       };
 
@@ -162,101 +171,130 @@ const UploadGallery = () => {
   };
 
   const onSubmit = async () => {
-    const fileData = JSON.stringify(initState['file_data']);
-    const fileExtension = JSON.stringify(initState['file_extension']);
+    $('#load').css('display', 'block');
+    const date = initState['date'];
+    const bodyYear = date.getFullYear();
+    const bodyDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`;
 
-    const year = initState['date'].getFullYear();
-
-    const getResponse = await fetch('/api/get', {
+    const response = await fetch('/api/sheet-filter', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ date: year, range: 'A:B' }),
+      body: JSON.stringify({ sheetName: bodyYear, columnId: 'date', word: bodyDate, resColumn: ['seq'] }),
     });
 
-    const getResult = await getResponse.json();
-    console.log(getResult.data);
+    const sheets = await response.json();
 
-    const response = await fetch('/api/insert', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ...initState, seq: '', file_data: fileData, file_extension: fileExtension }),
-    });
+    let maxSeq = 0;
+    Object.values(sheets.data).forEach((value) => (maxSeq = maxSeq < Number.parseInt(value['seq']) ? Number.parseInt(value['seq']) : maxSeq));
 
-    const content = await response.json();
-    console.log(content);
+    const images = initState['file_data'];
+    for (let index = 0; index < images.length; index++) {
+      const imgArr = images[index].toString().match(new RegExp(`.{1,${50000}}`, 'g'));
+      let fileData = {};
+      imgArr.forEach((str, i) => (fileData = { ...fileData, [`file_data_${(i + 1).toString().padStart(2, '0')}`]: str }));
+
+      const res_row = {
+        ...fileData,
+        date: initState['date'],
+        seq: Number.parseInt(maxSeq) + index + 1,
+        type: initState['type'],
+        target: initState['target'],
+        source: initState['source'],
+        source_url: initState['source_url'],
+        source_account: initState['source_account'],
+        file_extension: initState['file_extension'][index],
+      };
+
+      const insertResponse = await fetch('/api/insert', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          row: res_row,
+          title: bodyYear,
+        }),
+      });
+    }
+    $('#load').css('display', 'none');
   };
 
   return (
     <>
       <div>
-        <p>업로드 일자</p>
-        <CustomDatePicker>
-          <DatePicker
-            selected={selectDate}
-            onChange={(date) => {
-              changeState('date', date);
-              setSelectDate(date);
-            }}
-            dateFormat="yyyy-MM-dd"
-            customInput={<DatePickerInput />}
-            onMonthChange={handleMonthChange}
-            dayClassName={(d) =>
-              d.getMonth() === month
-                ? d.getDate() === selectDate.getDate() && d.getMonth() === selectDate.getMonth()
-                  ? 'custom-day selected-day'
-                  : 'custom-day'
-                : 'custom-day gray-day'
-            }
-          ></DatePicker>
-        </CustomDatePicker>
-      </div>
-      <div>
-        <p>대상</p>
-        <RadioButton value="common" name="target" text="공동" onChange={changeState}></RadioButton>
-        <RadioButton value="joowan" name="target" text="차주완" onChange={changeState}></RadioButton>
-        <RadioButton value="taebin" name="target" text="이태빈" onChange={changeState}></RadioButton>
-      </div>
-      <div>
-        <p>종류</p>
-        <RadioButton value="image" name="type" text="이미지" onChange={changeState}></RadioButton>
-        <RadioButton value="video" name="type" text="영상" onChange={changeState}></RadioButton>
-      </div>
-      <div>
-        <p>출처</p>
-        <SelectBox onChange={changeState} name="source"></SelectBox>
-      </div>
-      {initState['source'] !== '' && (
         <div>
-          <p>출처 계정</p>
-          <input style={{ width: '50%' }}></input>
+          <p>업로드 일자</p>
+          <CustomDatePicker>
+            <DatePicker
+              selected={selectDate}
+              onChange={(date) => {
+                changeState('date', date);
+                setSelectDate(date);
+              }}
+              dateFormat="yyyy-MM-dd"
+              customInput={<DatePickerInput />}
+              onMonthChange={handleMonthChange}
+              dayClassName={(d) =>
+                d.getMonth() === month
+                  ? d.getDate() === selectDate.getDate() && d.getMonth() === selectDate.getMonth()
+                    ? 'custom-day selected-day'
+                    : 'custom-day'
+                  : 'custom-day gray-day'
+              }
+            ></DatePicker>
+          </CustomDatePicker>
         </div>
-      )}
-      {initState['source'] !== '' && (
         <div>
-          <p>출처 URL</p>
-          <input style={{ width: '100%' }}></input>
+          <p>대상</p>
+          <RadioButton value="common" name="target" text="공동" onChange={changeState}></RadioButton>
+          <RadioButton value="joowan" name="target" text="차주완" onChange={changeState}></RadioButton>
+          <RadioButton value="taebin" name="target" text="이태빈" onChange={changeState}></RadioButton>
         </div>
-      )}
-      {initState['type'] !== '' && (
         <div>
-          <p>{initState['type'] === 'image' ? '이미지' : '썸네일'}</p>
-          <label style={{ cursor: 'pointer' }} htmlFor="fileImage">
-            선택하기
-          </label>
-          <input id="fileImage" style={{ display: 'none' }} type="file" onChange={onLoadFile} multiple></input>
+          <p>종류</p>
+          <RadioButton value="image" name="type" text="이미지" onChange={changeState}></RadioButton>
+          <RadioButton value="video" name="type" text="영상" onChange={changeState}></RadioButton>
         </div>
-      )}
-      {images.length > 0 &&
-        images.map((data, index) => {
-          return <ImageView key={index} data={data}></ImageView>;
-        })}
-      <button onClick={onSubmit}>등록하기</button>
+        <div>
+          <p>출처</p>
+          <SelectBox onChange={changeState} name="source"></SelectBox>
+        </div>
+        {initState['source'] !== '' && (
+          <div>
+            <p>출처 계정</p>
+            <input style={{ width: '50%' }}></input>
+          </div>
+        )}
+        {initState['source'] !== '' && (
+          <div>
+            <p>출처 URL</p>
+            <input style={{ width: '100%' }}></input>
+          </div>
+        )}
+        {initState['type'] !== '' && (
+          <div>
+            <p>{initState['type'] === 'image' ? '이미지' : '썸네일'}</p>
+            <label style={{ cursor: 'pointer' }} htmlFor="fileImage">
+              선택하기
+            </label>
+            <input id="fileImage" style={{ display: 'none' }} type="file" onChange={onLoadFile} multiple></input>
+          </div>
+        )}
+        <ImageBox>
+          {images.length > 0 &&
+            images.map((data, index) => {
+              return <ImageView key={index} data={data}></ImageView>;
+            })}
+        </ImageBox>
+        <button onClick={onSubmit}>등록하기</button>
+      </div>
+      <div id="load" style={{ display: 'none', width: '100%', position: 'absolute', top: '50%', textAlign: 'center' }}>
+        loading...
+      </div>
     </>
   );
 };

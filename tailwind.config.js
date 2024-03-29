@@ -9,6 +9,7 @@ module.exports = {
       },
       fontFamily: {
         continuous: ['var(--continuous-font)'],
+        dancingscript: ['var(--dancing-script-font)'],
       },
     },
   },

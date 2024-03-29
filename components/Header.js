@@ -8,7 +8,7 @@ const HeaderBody = styled.div(
     height: 150px;
     background: white;
 
-    font-family: var(--continuous-font);
+    font-family: var(--dancing-script-font);
     font-size: 50px;
     font-weight: bold;
 
